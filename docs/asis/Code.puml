@@ -1,0 +1,40 @@
+@startuml
+title FitLife Membership Management Code Diagram
+
+top to bottom direction
+
+!include ./C4_Component.puml
+
+class HeatingSystemController {
+  +ResponseEntity<HeatingSystemDto> getHeatingSystem()
+  +ResponseEntity<HeatingSystemDto> updateHeatingSystem()
+  +void turnOn()
+  +void turnOff()
+  +void setTargetTemperature()
+  +ResponseEntity<Double> getCurrentTemperature()
+}
+
+class HeatingSystemServiceImpl {
+  +HeatingSystemDto getHeatingSystem()
+  +HeatingSystemDto updateHeatingSystem()
+  +void turnOn()
+  +void turnOff()
+  +void setTargetTemperature()
+  +Double getCurrentTemperature()
+}
+
+class HeatingSystemBackgroundProcessorImpl {
+  +void Process
+}
+
+class HeatingSystemRepo {
+    + findAdd
+    + findById
+    + save
+}
+
+HeatingSystemController ..> HeatingSystemServiceImpl : uses
+HeatingSystemServiceImpl ..> HeatingSystemRepo : uses
+HeatingSystemBackgroundProcessorImpl ..> HeatingSystemRepo : uses
+
+@enduml
