@@ -15,14 +15,18 @@ Container_Boundary(SmartHomeSystem, "SmartHome System") {
   Container(ApiGateway, "BackendApiGateway", "Kong|Kusk", "Check auth, load balancing, microservices routing")
   Container(ApiGateway, "BackendApiGateway", "Kong|Kusk", "Check auth, load balancing, microservices routing")
 
-  together{
+
   Container(DeviceManager, "Device manager microservice", "golang", "Handle user's sensors and controllers")
   Container(Telemetry, "Telemetry microservice", "golang", "Handle user's sensors telemetry")
-}
+
   Container(HeatingSystemService, "Heating devices microservice", "golang", "Knows how to control heating devices in user's home")
-  Container(LightsSystemService, "light devices microservice", "golang", "Knows how to control light in user's home")
+  Container(HeatingSystemServiceDatabase, "Heating devices microservice database", "PostgreSQL", "Stores command logs")
+  Container(LightsSystemService, "Light devices microservice", "golang", "Knows how to control light in user's home")
+  Container(LightsSystemServiceDatabase, "Light devices microservice database", "PostgreSQL", "Stores command logs")
   Container(HouseGatesSystemService, "House gate devices microservice", "golang", "Knows how to control user's house gates")
+  Container(HouseGatesSystemServiceDatabase, "House gate microservice database", "PostgreSQL", "Stores command logs")
   Container(CamerasSystemService, "House security cameras microservice", "golang", "Knows how to control security cameras in user's home")
+  Container(CamerasSystemServiceDatabase, "House security cameras microservice database", "PostgreSQL", "Stores command logs")
 
   together {
       Container(Database, "Database", "PostgreSQL", "Stores sensor's data and current setup")
@@ -39,7 +43,7 @@ Rel(UserFrontend, ApiGateway, "handle http requests")
 Rel(AdminFrontend, ApiGateway, "handle http requests")
 Rel(ApiGateway, Telemetry, "handle http requests")
 Rel(ApiGateway, DeviceManager, "handle http requests")
-Rel(DeviceManager,Telemetry,"Reads/Writes smartHome data")
+Rel(DeviceManager,Telemetry,"Get telemetry data")
 Rel(DeviceManager,Queue,"Publish command for user device")
 Rel(Queue,HeatingSystemService,"Subscribe for heating device commands")
 Rel(Queue,LightsSystemService,"Subscribe for light device commands")
@@ -49,7 +53,11 @@ Rel(DeviceManager,Database,"Reads/Writes smartHome data")
 Rel(Telemetry,DatabaseTelemetry,"Reads/Writes smartHome sensors telemetry")
 Rel(usersHome,ApiGateway,"Writes smartHome sensors telemetry")
 Rel(HeatingSystemService,usersHome,"Send smartHome device command")
+Rel(HeatingSystemService,HeatingSystemServiceDatabase,"Store command logs")
 Rel(LightsSystemService,usersHome,"Send smartHome device command")
+Rel(LightsSystemService,LightsSystemServiceDatabase,"Store command logs")
 Rel(HouseGatesSystemService,usersHome,"Send smartHome device command")
+Rel(HouseGatesSystemService,HouseGatesSystemServiceDatabase,"Store command logs")
 Rel(CamerasSystemService,usersHome,"Send smartHome device command")
+Rel(CamerasSystemService,CamerasSystemServiceDatabase,"Store command logs")
 @enduml
