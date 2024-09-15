@@ -1,0 +1,55 @@
+@startuml
+title SmartHomeSystem Container Diagram
+
+top to bottom direction
+
+!include ./C4_Container.puml
+
+Person(user, "User", "A user of the SmartHome system")
+Person(admin, "Admin", "Administrator of the SmartHome system")
+System(SmartHomeSystem, "SmartHome System", "System manages user's smart home")
+
+Container_Boundary(SmartHomeSystem, "SmartHome System") {
+  Container(UserFrontend, "Web Application frontend", "JS/TS/React", "Handles user interactions")
+  Container(AdminFrontend, "Admin panel frontend", "JS/TS/React", "Handles admin interactions")
+  Container(ApiGateway, "BackendApiGateway", "Kong|Kusk", "Check auth, load balancing, microservices routing")
+  Container(ApiGateway, "BackendApiGateway", "Kong|Kusk", "Check auth, load balancing, microservices routing")
+
+  together{
+  Container(DeviceManager, "Device manager microservice", "golang", "Handle user's sensors and controllers")
+  Container(Telemetry, "Telemetry microservice", "golang", "Handle user's sensors telemetry")
+}
+  Container(HeatingSystemService, "Heating devices microservice", "golang", "Knows how to control heating devices in user's home")
+  Container(LightsSystemService, "light devices microservice", "golang", "Knows how to control light in user's home")
+  Container(HouseGatesSystemService, "House gate devices microservice", "golang", "Knows how to control user's house gates")
+  Container(CamerasSystemService, "House security cameras microservice", "golang", "Knows how to control security cameras in user's home")
+
+  together {
+      Container(Database, "Database", "PostgreSQL", "Stores sensor's data and current setup")
+      Container(DatabaseTelemetry, "NoSQL database", "MonogoDB", "Stores devices telemetry")
+      Container(Queue, "Queue", "Kafka", "Messages for async processing")
+  }
+}
+
+System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers in the user's home")
+
+Rel(user, UserFrontend, "Uses the system: control smart home using SaaS system")
+Rel(admin, AdminFrontend,"Register/update user's home heating system")
+Rel(UserFrontend, ApiGateway, "handle http requests")
+Rel(AdminFrontend, ApiGateway, "handle http requests")
+Rel(ApiGateway, Telemetry, "handle http requests")
+Rel(ApiGateway, DeviceManager, "handle http requests")
+Rel(DeviceManager,Telemetry,"Reads/Writes smartHome data")
+Rel(DeviceManager,Queue,"Publish command for user device")
+Rel(Queue,HeatingSystemService,"Subscribe for heating device commands")
+Rel(Queue,LightsSystemService,"Subscribe for light device commands")
+Rel(Queue,HouseGatesSystemService,"Subscribe for house gates device commands")
+Rel(Queue,CamerasSystemService,"Subscribe for security cameras commands")
+Rel(DeviceManager,Database,"Reads/Writes smartHome data")
+Rel(Telemetry,DatabaseTelemetry,"Reads/Writes smartHome sensors telemetry")
+Rel(usersHome,ApiGateway,"Writes smartHome sensors telemetry")
+Rel(HeatingSystemService,usersHome,"Send smartHome device command")
+Rel(LightsSystemService,usersHome,"Send smartHome device command")
+Rel(HouseGatesSystemService,usersHome,"Send smartHome device command")
+Rel(CamerasSystemService,usersHome,"Send smartHome device command")
+@enduml
