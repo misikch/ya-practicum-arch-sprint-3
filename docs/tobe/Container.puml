@@ -27,24 +27,19 @@ Container_Boundary(SmartHomeSystem, "SmartHome System") {
     }
 
     together {
-        Container(HeatingSystemService, "Heating devices microservice", "golang", "Knows how to control heating devices in user's home")
-        Container(HeatingSystemServiceDatabase, "Heating devices microservice database", "PostgreSQL", "Stores command logs")
+        Container(AuthService, "Check Auth microservice", "golang", "user auth service")
+        Container(AuthServiceDatabase, "Auth microservice DB", "PostgreSQL", "Stores auth data (tokens, etc)")
     }
 
     together {
-        Container(LightsSystemService, "Light devices microservice", "golang", "Knows how to control light in user's home")
-        Container(LightsSystemServiceDatabase, "Light devices microservice database", "PostgreSQL", "Stores command logs")
+        Container(UserProfileService, "User microservice", "golang", "Users profile data")
+        Container(UserProfileServiceDatabase, "User microservice DB", "PostgreSQL", "Stores users")
     }
 
-    together {
-        Container(HouseGatesSystemService, "House gate devices microservice", "golang", "Knows how to control user's house gates")
-        Container(HouseGatesSystemServiceDatabase, "House gate microservice database", "PostgreSQL", "Stores command logs")
-    }
-
-    together {
-        Container(CamerasSystemService, "House security cameras microservice", "golang", "Knows how to control security cameras in user's home")
-        Container(CamerasSystemServiceDatabase, "House security cameras microservice database", "PostgreSQL", "Stores command logs")
-    }
+        together {
+            Container(Monolith, "Monolith", "java", "Monolith web app")
+            Container(MonolithDatabase, "Monolith DB", "PostgreSQL", "Stores heating device's data")
+        }
 
     Container(Databus, "Databus", "Kafka", "Messages for async processing")
 }
@@ -57,21 +52,18 @@ Rel(UserFrontend, ApiGateway, "handle http requests")
 Rel(AdminFrontend, ApiGateway, "handle http requests")
 Rel(ApiGateway, Telemetry, "handle http requests")
 Rel(ApiGateway, DeviceManager, "handle http requests")
+Rel(ApiGateway, AuthService, "check auth")
+Rel(ApiGateway, UserProfileService, "register/edit user profile")
 Rel(DeviceManager,Telemetry,"Get telemetry data")
-Rel(DeviceManager,Databus,"Publish command for user device")
-Rel(Databus,HeatingSystemService,"Subscribe for heating device commands")
-Rel(Databus,LightsSystemService,"Subscribe for light device commands")
-Rel(Databus,HouseGatesSystemService,"Subscribe for house gates device commands")
-Rel(Databus,CamerasSystemService,"Subscribe for security cameras commands")
+Rel(DeviceManager,Databus,"Subscribe for telemetry data")
+Rel(Telemetry,Databus,"Publish telemetry user device's data")
 Rel(DeviceManager,Database,"Reads/Writes smartHome data")
 Rel(Telemetry,DatabaseTelemetry,"Reads/Writes smartHome sensors telemetry")
+Rel(AuthService, AuthServiceDatabase, "Reads/Writes auth data")
+Rel(UserProfileService, UserProfileServiceDatabase, "Reads/Writes user profile data")
+Rel(Monolith, MonolithDatabase, "Reads/Writes user's heating devices data")
+Rel(Monolith, Databus, "Subscribe for telemetry heating devices events")
+Rel(Monolith, usersHome, "Send command to control heating devices")
+Rel(DeviceManager, usersHome, "Send commands to devices")
 Rel(usersHome,ApiGateway,"Writes smartHome sensors telemetry")
-Rel(HeatingSystemService,usersHome,"Send smartHome device command")
-Rel(HeatingSystemService,HeatingSystemServiceDatabase,"Store command logs")
-Rel(LightsSystemService,usersHome,"Send smartHome device command")
-Rel(LightsSystemService,LightsSystemServiceDatabase,"Store command logs")
-Rel(HouseGatesSystemService,usersHome,"Send smartHome device command")
-Rel(HouseGatesSystemService,HouseGatesSystemServiceDatabase,"Store command logs")
-Rel(CamerasSystemService,usersHome,"Send smartHome device command")
-Rel(CamerasSystemService,CamerasSystemServiceDatabase,"Store command logs")
 @enduml
