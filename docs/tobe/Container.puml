@@ -3,6 +3,7 @@ title SmartHomeSystem Container Diagram
 
 top to bottom direction
 
+
 !include ./C4_Container.puml
 
 Person(user, "User", "A user of the SmartHome system")
@@ -66,4 +67,8 @@ Rel(Monolith, Databus, "Subscribe for telemetry heating devices events")
 Rel(Monolith, usersHome, "Send command to control heating devices")
 Rel(DeviceManager, usersHome, "Send commands to devices")
 Rel(usersHome,ApiGateway,"Writes smartHome sensors telemetry")
+
+Monolith -[hidden]down- usersHome
+DeviceManager -[hidden]right- Telemetry
+ApiGateway -[hidden]down- Telemetry
 @enduml
