@@ -7,24 +7,119 @@ top to bottom direction
 
 Person(user, "User", "A user of the SmartHome system")
 Person(admin, "Admin", "Administrator of the SmartHome system")
+System(SmartHomeSystem, "SmartHome System", "System manages user's smart home")
 
 Container_Boundary(SmartHomeSystem, "SmartHome System") {
-  Container(WebApp, "Web Application", "Java", "Handles user interactions")
-  Container(Database, "Database", "PostgreSQL", "Stores sensor's data and current setup")
+    Container(UserFrontend, "Web Application frontend", "JS/TS/React", "Handles user interactions")
+    Container(AdminFrontend, "Admin panel frontend", "JS/TS/React", "Handles admin interactions")
+    Container(ApiGateway, "BackendApiGateway", "Kong|Kusk", "Check auth, load balancing, microservices routing")
+    Container(ApiGateway, "BackendApiGateway", "Kong|Kusk", "Check auth, load balancing, microservices routing")
+
+    together {
+        together {
+            Container(DeviceManager, "Device manager microservice", "golang", "Handle user's sensors and controllers")
+            Container(Database, "Database", "PostgreSQL", "Stores sensor's data and current setup")
+        }
+        together {
+            Container(Telemetry, "Telemetry microservice", "golang", "Handle user's sensors telemetry")
+            Container(DatabaseTelemetry, "NoSQL database", "MonogoDB", "Stores devices telemetry")
+        }
+    }
+
+    together {
+        Container(AuthService, "Check Auth microservice", "golang", "user auth service")
+        Container(AuthServiceDatabase, "Auth microservice DB", "PostgreSQL", "Stores auth data (tokens, etc)")
+    }
+
+    together {
+        Container(UserProfileService, "User profile microservice", "golang", "Users profile data")
+        Container(UserProfileServiceDatabase, "User microservice DB", "PostgreSQL", "Stores users")
+    }
+
+        together {
+            Container(Monolith, "Monolith", "java", "Monolith web app")
+            Container(MonolithDatabase, "Monolith DB", "PostgreSQL", "Stores heating device's data")
+        }
+
+    Container(Databus, "Databus", "Kafka", "Messages for async processing")
 }
 
-Container(WebApp, "Web Application", "Java") {
-  Component(HeatingSystemController, "HeatingSystem Controller", "Handles heating system status and temp")
-  Component(HeatingSystemService, "Service Layer", "Business logic (Update entity, set temp, get current temp")
-  Component(BackgroundHeatingSystemProcessor, "Background Heating System Processor", "Maintaining a set temperature in users' homes")
-  Component(RepositoryLayer, "Repository Layer", "Data access logic")
+Container(Monolith, "Monolith Web Application", "Java") {
+  Component(MonolithHeatingSystemController, "HeatingSystem Controller", "Handles heating system status and temp")
+  Component(MonolithHeatingSystemService, "Service Layer", "Business logic (Update entity, set temp, get current temp")
+  Component(MonolithBackgroundHeatingSystemProcessor, "Background Heating System Processor", "Maintaining a set temperature in users' homes")
+  Component(MonolithRepositoryLayer, "Repository Layer", "Data access logic")
 }
 
-Rel(user,HeatingSystemController,"On/off heating system\n set temp\n get current temp")
-Rel(admin,HeatingSystemController,"Register/update user's heating home system")
-Rel(HeatingSystemController,HeatingSystemService,"Calls business logic")
+Container(UserProfileService, "User profile microservice", "Golang") {
+  Component(UserProfileController, "User Profile Handler", "Handles users profiles (CRUD)")
+  Component(UserProfileServiceLayer, "Service Layer", "Store data, update data")
+  Component(UserProfileRepositoryLayer, "Repository Layer", "Data access logic")
+}
 
-Rel(BackgroundHeatingSystemProcessor,RepositoryLayer,"Reads/Writes data")
-Rel(HeatingSystemService,RepositoryLayer,"Reads/Writes data")
-Rel(RepositoryLayer,Database,"Reads/Writes heating system data")
+Container(AuthService, "Check Auth microservice", "Golang") {
+  Component(AuthServiceController, "Auth service Handler", "Check user auth")
+  Component(AuthServiceServiceLayer, "Service Layer", "business logic for auth")
+  Component(AuthServiceRepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Container(Telemetry, "Telemetry microservice", "Golang") {
+  Component(TelemetryController, "Telemetry http req handler", "send data, get stored data")
+  Component(TelemetryServiceLayer, "Service Layer", "business logic for telemetry")
+  Component(TelemetryRepositoryLayer, "Repository Layer", "Data access logic")
+  Component(TelemetryDatabusAdapter, "Databus adapter", "publish telemetry to databus")
+}
+
+Container(DeviceManager, "Device manager microservice", "Golang") {
+  Component(DeviceManagerController, "Device manager http req handler", "send data, get stored data")
+  Component(DeviceManagerServiceLayer, "Service Layer", "business logic for telemetry")
+  Component(DeviceManagerBackgroundWorker, "Background worker pool", "run background business logic")
+  Component(DeviceManagerRepositoryLayer, "Repository Layer", "Data access logic")
+  Component(DeviceManagerDatabusAdapter, "Databus adapter", "sub to telemetry data from databus")
+}
+
+System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers in the user's home")
+
+Rel(user, UserFrontend, "Uses the system: control smart home using SaaS system")
+Rel(admin, AdminFrontend,"Register/update user's home heating system")
+Rel(UserFrontend, ApiGateway, "handle http requests")
+Rel(AdminFrontend, ApiGateway, "handle http requests")
+
+Rel(ApiGateway, DeviceManagerController, "handle http requests")
+Rel(DeviceManagerController, DeviceManagerServiceLayer, "run business logic")
+Rel(DeviceManagerServiceLayer, DeviceManagerRepositoryLayer, "read/write devices config")
+Rel(DeviceManagerServiceLayer, DeviceManagerDatabusAdapter, "Subscribe for telemetry data")
+Rel(DeviceManagerServiceLayer, DeviceManagerBackgroundWorker, "run background business logic")
+Rel(DeviceManagerRepositoryLayer,Database,"Reads/Writes smartHome data")
+Rel(DeviceManagerDatabusAdapter,Databus,"Subscribe for telemetry data")
+Rel(DeviceManagerServiceLayer, usersHome, "Send commands to devices")
+Rel(DeviceManagerBackgroundWorker, usersHome, "Send commands to devices")
+
+Rel(ApiGateway, TelemetryController, "handle http requests")
+Rel(TelemetryController, TelemetryServiceLayer, "run business logic")
+Rel(TelemetryServiceLayer, TelemetryRepositoryLayer, "read/write data to storage")
+Rel(TelemetryServiceLayer, TelemetryDatabusAdapter, "publish data to databus")
+Rel(TelemetryDatabusAdapter,Databus,"Publish telemetry user device's data")
+Rel(TelemetryRepositoryLayer,DatabaseTelemetry,"Reads/Writes smartHome sensors telemetry")
+Rel(DeviceManager,TelemetryController,"Get telemetry data")
+
+Rel(ApiGateway, AuthServiceController, "check auth")
+Rel(AuthServiceController, AuthServiceServiceLayer, "check auth")
+Rel(AuthServiceServiceLayer, AuthServiceRepositoryLayer, "business logic for auth")
+Rel(AuthServiceRepositoryLayer, AuthServiceDatabase, "Reads/Writes user profile data")
+
+Rel(ApiGateway, UserProfileController, "register/edit user profile")
+Rel(UserProfileController, UserProfileServiceLayer, "register/edit user profile")
+Rel(UserProfileServiceLayer, UserProfileRepositoryLayer, "register/edit user profile")
+Rel(UserProfileRepositoryLayer, UserProfileServiceDatabase, "Reads/Writes user profile data")
+
+Rel(ApiGateway, MonolithHeatingSystemController, "handle http requests")
+Rel(MonolithHeatingSystemController, MonolithHeatingSystemService, "run business logic")
+Rel(MonolithHeatingSystemService, MonolithBackgroundHeatingSystemProcessor, "run tasks")
+Rel(MonolithHeatingSystemService, MonolithRepositoryLayer, "read/write data to storage")
+Rel(MonolithRepositoryLayer, MonolithDatabase, "Reads/Writes user's heating devices data")
+Rel(MonolithBackgroundHeatingSystemProcessor, Databus, "Subscribe for telemetry heating devices events")
+Rel(MonolithBackgroundHeatingSystemProcessor, usersHome, "Send command to control heating devices")
+
+Rel(usersHome,ApiGateway,"Writes smartHome sensors telemetry")
 @enduml
