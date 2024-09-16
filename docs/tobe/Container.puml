@@ -33,7 +33,7 @@ Container_Boundary(SmartHomeSystem, "SmartHome System") {
     }
 
     together {
-        Container(UserProfileService, "User microservice", "golang", "Users profile data")
+        Container(UserProfileService, "User profile microservice", "golang", "Users profile data")
         Container(UserProfileServiceDatabase, "User microservice DB", "PostgreSQL", "Stores users")
     }
 
@@ -55,6 +55,7 @@ Rel(ApiGateway, Telemetry, "handle http requests")
 Rel(ApiGateway, DeviceManager, "handle http requests")
 Rel(ApiGateway, AuthService, "check auth")
 Rel(ApiGateway, UserProfileService, "register/edit user profile")
+Rel(ApiGateway, Monolith, "handle http requests")
 Rel(DeviceManager,Telemetry,"Get telemetry data")
 Rel(DeviceManager,Databus,"Subscribe for telemetry data")
 Rel(Telemetry,Databus,"Publish telemetry user device's data")
