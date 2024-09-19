@@ -1,40 +1,48 @@
 @startuml
-title SmartHomeSystem Web App Code Diagram
+title SmartHomeSystem Telemetry Microservice
 
 top to bottom direction
 
 !include ./C4_Component.puml
 
-class HeatingSystemController {
-  +ResponseEntity<HeatingSystemDto> getHeatingSystem()
-  +ResponseEntity<HeatingSystemDto> updateHeatingSystem()
-  +void turnOn()
-  +void turnOff()
-  +void setTargetTemperature()
-  +ResponseEntity<Double> getCurrentTemperature()
+class TelemetryMicroserviceHandler {
+  +PostTelemetryData
+  +GetTelemetryHistoryData
+  +GetTelemetryLatestData
 }
 
-class HeatingSystemServiceImpl {
-  +HeatingSystemDto getHeatingSystem()
-  +HeatingSystemDto updateHeatingSystem()
-  +void turnOn()
-  +void turnOff()
-  +void setTargetTemperature()
-  +Double getCurrentTemperature()
+class TelemetryMicroserviceService {
+  +AddTelemetry
+  +GetTelemetryLatest
+  +GetTelemetryHistory
 }
 
-class HeatingSystemBackgroundProcessorImpl {
+class TelemetryMicroserviceTelemetryRepo{
+  +GetLatestTelemetry
+  +GetHistoricalTelemetry
+  +AddTelemetry
+}
+
+class TelemetryMicroserviceDeviceRepo{
+  +CreateDevice
+  +UpdateDevice
+  +GetDeviceById
+}
+
+class TelemetryMicroserviceWorker {
   +void Process
 }
 
-class HeatingSystemRepo {
-    + findAdd
-    + findById
-    + save
+class TelemetryMicroserviceTelemetryDatabusPublisher {
+    + PublishTelemetry
 }
 
-HeatingSystemController ..> HeatingSystemServiceImpl : uses
-HeatingSystemServiceImpl ..> HeatingSystemRepo : uses
-HeatingSystemBackgroundProcessorImpl ..> HeatingSystemRepo : uses
+TelemetryMicroserviceHandler ..> TelemetryMicroserviceService : uses
+TelemetryMicroserviceService ..> TelemetryMicroserviceTelemetryRepo : uses (get/save telemetry)
+TelemetryMicroserviceService ..> TelemetryMicroserviceDeviceRepo : uses (check device exists and in correct status)
+TelemetryMicroserviceService ..> TelemetryMicroserviceTelemetryDatabusPublisher : uses (pubslish telemetry msg)
+
+TelemetryMicroserviceWorker ..> TelemetryMicroserviceTelemetryRepo : uses (create/update device info and status)
+
 
 @enduml

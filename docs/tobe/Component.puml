@@ -18,7 +18,7 @@ Container_Boundary(SmartHomeSystem, "SmartHome System") {
     together {
         together {
             Container(DeviceManager, "Device manager microservice", "golang", "Handle user's sensors and controllers")
-            Container(Database, "Database", "PostgreSQL", "Stores sensor's data and current setup")
+            Container(Database, "Database", "PostgreSQL|MongoDB", "Stores devices and setup")
         }
         together {
             Container(Telemetry, "Telemetry microservice", "golang", "Handle user's sensors telemetry")
@@ -68,16 +68,16 @@ Container(Telemetry, "Telemetry microservice", "Golang") {
   Component(TelemetryServiceLayer, "Service Layer", "business logic for telemetry")
   Component(TelemetryRepositoryLayer, "Repository Layer", "Data access logic")
   Component(TelemetryDatabusAdapter, "Databus adapter", "publish telemetry to databus")
+  Component(TelemetryWorker, "Background worker", "get info about devices (create/update)")
 }
 
 Container(DeviceManager, "Device manager microservice", "Golang") {
   Component(DeviceManagerController, "Device manager http req handler", "send data, get stored data")
-  Component(DeviceManagerServiceLayer, "Service Layer", "business logic for telemetry")
+  Component(DeviceManagerServiceLayer, "Service Layer", "business logic (create device, update status, run command)")
   Component(DeviceManagerCommandsProcessor, "Devices commands processor", "business logic for devices commands")
-  Component(DeviceManagerDevicesStatusManager, "Devices status manager", "business logic for devices status management")
-  Component(DeviceManagerBackgroundWorker, "Background worker pool", "run background business logic")
+  Component(DeviceManagerBackgroundWorker, "Background worker pool", "run background business logic (like heating controllers")
   Component(DeviceManagerRepositoryLayer, "Repository Layer", "Data access logic")
-  Component(DeviceManagerDatabusAdapter, "Databus adapter", "sub to telemetry data from databus")
+  Component(DeviceManagerDatabusAdapter, "Databus adapter", "publish create/update device event")
 }
 
 System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers in the user's home")
@@ -90,12 +90,12 @@ Rel(AdminFrontend, ApiGateway, "handle http requests")
 Rel(ApiGateway, DeviceManagerController, "handle http requests")
 Rel(DeviceManagerController, DeviceManagerServiceLayer, "run business logic")
 Rel(DeviceManagerServiceLayer, DeviceManagerRepositoryLayer, "read/write devices config")
-Rel(DeviceManagerServiceLayer, DeviceManagerDatabusAdapter, "Subscribe for telemetry data")
+Rel(DeviceManagerServiceLayer, DeviceManagerDatabusAdapter, "Publish create/update device event")
 Rel(DeviceManagerServiceLayer, DeviceManagerBackgroundWorker, "run background business logic")
 Rel(DeviceManagerServiceLayer, DeviceManagerCommandsProcessor, "run business logic for devices commands")
 Rel(DeviceManagerServiceLayer, DeviceManagerDevicesStatusManager, "run business logic for devices status management")
 Rel(DeviceManagerRepositoryLayer,Database,"Reads/Writes smartHome data")
-Rel(DeviceManagerDatabusAdapter,Databus,"Subscribe for telemetry data")
+Rel(DeviceManagerDatabusAdapter,Databus,"Publish device create/update event")
 Rel(DeviceManagerCommandsProcessor, usersHome, "Send commands to devices")
 Rel(DeviceManagerBackgroundWorker, usersHome, "Send commands to devices")
 
@@ -104,8 +104,10 @@ Rel(TelemetryController, TelemetryServiceLayer, "run business logic")
 Rel(TelemetryServiceLayer, TelemetryRepositoryLayer, "read/write data to storage")
 Rel(TelemetryServiceLayer, TelemetryDatabusAdapter, "publish data to databus")
 Rel(TelemetryDatabusAdapter,Databus,"Publish telemetry user device's data")
+Rel(TelemetryDatabusAdapter,Databus,"Subscribe for devices info")
 Rel(TelemetryRepositoryLayer,DatabaseTelemetry,"Reads/Writes smartHome sensors telemetry")
-Rel(DeviceManager,TelemetryController,"Get telemetry data")
+Rel(TelemetryWorker, TelemetryDatabusAdapter, "Subscribe for devices info")
+Rel(TelemetryWorker, TelemetryRepositoryLayer, "Update entity into telemetry-devices table")
 
 Rel(ApiGateway, AuthServiceController, "check auth")
 Rel(AuthServiceController, AuthServiceServiceLayer, "check auth")
