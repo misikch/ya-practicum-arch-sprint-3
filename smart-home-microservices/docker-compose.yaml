@@ -5,12 +5,13 @@ services:
     image: 'bitnami/kong:3.7.1'
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /kong.yml
+      KONG_DECLARATIVE_CONFIG: /config/kong.yml
       KONG_PROXY_LISTEN: "0.0.0.0:8000"
     ports:
       - "8000:8000"
+      - "8001:8001"
     volumes:
-      - ./kong.yml:/kong.yml
+      - ./kong.yml:/config/kong.yml
     depends_on:
       - device-manager
       - telemetry-service
@@ -18,8 +19,8 @@ services:
   device-manager:
     image: misikch/ya-practicum-arch-sprint3-device-manager:latest
     container_name: device-manager
-#    ports:
-#      - 8081:8081
+    ports:
+      - "8081"
     command: ["/app/service"]
     environment:
       - SERVICE_PORT=8081
@@ -40,8 +41,8 @@ services:
 
   telemetry-service:
     image: misikch/ya-practicum-arch-sprint3-telemetry:latest
-#    ports:
-#      - 8082:8082
+    ports:
+      - "8082"
     command: [ "/app/service" ]
     environment:
       - SERVICE_PORT=8082

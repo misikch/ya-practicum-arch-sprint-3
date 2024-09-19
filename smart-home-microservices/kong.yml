@@ -5,7 +5,8 @@ services:
     routes:
       - name: device-manager-route
         paths:
-          - /devices
+          - /api
+        strip_path: true   # Убирает префикс пути
         methods:
           - GET
           - POST
@@ -16,16 +17,10 @@ services:
     routes:
       - name: telemetry-service-route
         paths:
-          - /devices/{device_id}/telemetry
+          - /api/data
         methods:
           - GET
           - POST
-
-      - name: latest-telemetry-route
-        paths:
-          - /devices/{device_id}/telemetry/latest
-        methods:
-          - GET
 
 plugins:
   - name: cors
