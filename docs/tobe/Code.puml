@@ -47,7 +47,7 @@ package "Telemetry Microservice" {
     TelemetryMicroserviceServiceLayer ..> TelemetryMicroserviceDeviceRepo : uses (check device exists and in correct status)
     TelemetryMicroserviceServiceLayer ..> TelemetryMicroserviceTelemetryDatabusPublisher : uses (pubslish telemetry msg)
 
-    TelemetryMicroserviceWorker ..> TelemetryMicroserviceTelemetryRepo : uses (create/update device info and status)
+    TelemetryMicroserviceWorker ..> TelemetryMicroserviceDeviceRepo : uses (create/update device info and status)
     TelemetryMicroserviceWorker ..> TelemetryMicroserviceTelemetryDevicesDatabusSubscriber : uses (subscribe for device create/update events)
 
     class DeviceInfo {
@@ -65,6 +65,7 @@ package "Telemetry Microservice" {
     TelemetryMicroserviceTelemetryDevicesDatabusSubscriber ..> DeviceInfo : contains
     TelemetryMicroserviceTelemetryRepo ..> TelemetryData : contains
     TelemetryMicroserviceDeviceRepo ..> DeviceInfo : contains
+    TelemetryMicroserviceTelemetryDatabusPublisher ..> TelemetryData : contains
 }
 
 
