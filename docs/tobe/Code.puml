@@ -1,48 +1,119 @@
 @startuml
-title SmartHomeSystem Telemetry Microservice
+title SmartHomeSystem Microservices
 
 top to bottom direction
 
 !include ./C4_Component.puml
 
-class TelemetryMicroserviceHandler {
-  +PostTelemetryData
-  +GetTelemetryHistoryData
-  +GetTelemetryLatestData
+package "Telemetry Microservice" {
+    class TelemetryMicroserviceHandler {
+      +PostTelemetryData
+      +GetTelemetryHistoryData
+      +GetTelemetryLatestData
+    }
+
+    class TelemetryMicroserviceServiceLayer {
+      +AddTelemetry
+      +GetTelemetryLatest
+      +GetTelemetryHistory
+    }
+
+    class TelemetryMicroserviceTelemetryRepo{
+      +GetLatestTelemetry
+      +GetHistoricalTelemetry
+      +AddTelemetry
+    }
+
+    class TelemetryMicroserviceDeviceRepo{
+      +CreateDevice
+      +UpdateDevice
+      +GetDeviceById
+    }
+
+    class TelemetryMicroserviceWorker {
+      +void Process
+    }
+
+    class TelemetryMicroserviceTelemetryDatabusPublisher {
+        + PublishTelemetry
+    }
+
+    class TelemetryMicroserviceTelemetryDevicesDatabusSubscriber {
+        + SubscribeForDeviceCreateUpdateEvent
+    }
+
+    TelemetryMicroserviceHandler ..> TelemetryMicroserviceServiceLayer : uses
+    TelemetryMicroserviceServiceLayer ..> TelemetryMicroserviceTelemetryRepo : uses (get/save telemetry)
+    TelemetryMicroserviceServiceLayer ..> TelemetryMicroserviceDeviceRepo : uses (check device exists and in correct status)
+    TelemetryMicroserviceServiceLayer ..> TelemetryMicroserviceTelemetryDatabusPublisher : uses (pubslish telemetry msg)
+
+    TelemetryMicroserviceWorker ..> TelemetryMicroserviceTelemetryRepo : uses (create/update device info and status)
+    TelemetryMicroserviceWorker ..> TelemetryMicroserviceTelemetryDevicesDatabusSubscriber : uses (subscribe for device create/update events)
+
+    class DeviceInfo {
+        +string DeviceID
+        +string Status
+    }
+
+    class TelemetryData {
+    	+string DeviceId
+    	+string DeviceType
+    	+timestamp CreatedAt
+    	+string TelemetryData
+    }
+
+    TelemetryMicroserviceTelemetryDevicesDatabusSubscriber ..> DeviceInfo : contains
+    TelemetryMicroserviceTelemetryRepo ..> TelemetryData : contains
+    TelemetryMicroserviceDeviceRepo ..> DeviceInfo : contains
 }
 
-class TelemetryMicroserviceService {
-  +AddTelemetry
-  +GetTelemetryLatest
-  +GetTelemetryHistory
+
+package "Device-Manager Microservice" {
+    class DeviceManagerMicroserviceHandler {
+      +POSTCreateDevice
+      +GETDevice
+      +UpdateDeviceStatus
+      +RunCommand
+    }
+
+    class DeviceManagerMicroserviceServiceLayer {
+      +CreateDevice
+      +GetDeviceInfo
+      +RunCommand
+      +UpdateDeviceStatus
+    }
+
+    class DeviceManagerMicroserviceRepo{
+      +AddDevice
+      +GetDevice
+      +GetDeviceBySerial
+      +UpdateDeviceStatus
+      +LogCommandToDevice
+    }
+
+    class TelemetryMicroserviceTelemetryDatabusPublisher {
+        + PublishDevice
+    }
+
+    DeviceManagerMicroserviceHandler ..> DeviceManagerMicroserviceServiceLayer : uses
+    DeviceManagerMicroserviceServiceLayer ..> DeviceManagerMicroserviceRepo : uses (add device, log command, update device)
+    DeviceManagerMicroserviceServiceLayer ..> TelemetryMicroserviceTelemetryDatabusPublisher : uses (pubslish create/update device msg)
+
+    class DeviceEntity {
+      +string DeviceID
+      +string DeviceType
+      +string SerialNumber
+      +string Status
+    }
+
+    class DeviceDatabusMsg {
+        +string DeviceID
+        +string Status
+    }
+
+    DeviceManagerMicroserviceRepo ..> DeviceEntity : contains
+    TelemetryMicroserviceTelemetryDatabusPublisher ..> DeviceDatabusMsg : contains
 }
-
-class TelemetryMicroserviceTelemetryRepo{
-  +GetLatestTelemetry
-  +GetHistoricalTelemetry
-  +AddTelemetry
-}
-
-class TelemetryMicroserviceDeviceRepo{
-  +CreateDevice
-  +UpdateDevice
-  +GetDeviceById
-}
-
-class TelemetryMicroserviceWorker {
-  +void Process
-}
-
-class TelemetryMicroserviceTelemetryDatabusPublisher {
-    + PublishTelemetry
-}
-
-TelemetryMicroserviceHandler ..> TelemetryMicroserviceService : uses
-TelemetryMicroserviceService ..> TelemetryMicroserviceTelemetryRepo : uses (get/save telemetry)
-TelemetryMicroserviceService ..> TelemetryMicroserviceDeviceRepo : uses (check device exists and in correct status)
-TelemetryMicroserviceService ..> TelemetryMicroserviceTelemetryDatabusPublisher : uses (pubslish telemetry msg)
-
-TelemetryMicroserviceWorker ..> TelemetryMicroserviceTelemetryRepo : uses (create/update device info and status)
 
 
 @enduml

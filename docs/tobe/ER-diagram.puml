@@ -52,7 +52,7 @@ entity Command {
   *name: String
 }
 
-User ||..o{ House : содержит
+User ||..o{ House : пользователю может принадлежать\n несколько домов
 House ||--o{ Device : содержит
 Device ||--|| DeviceType : имеет тип
 Device ||--o{ Module : может подключаться \nк множеству \nмодулей управления
