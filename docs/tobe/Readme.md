@@ -26,7 +26,11 @@ web-interface системы SH.
 - Сложность поддержки/развертывания системы (DevOps)
 
 ### C4-диаграмма приложения
-- файлы Context.puml, Container.puml, Component.puml, Code.puml, ER-diagram
+- [Context layer](Context.puml)
+- [Container layer](Container.puml)
+- [Component layer](Component.puml)
+- [Code layer](Code.puml)
+- [ER-diagram](ER-diagram.puml)
 
 
 

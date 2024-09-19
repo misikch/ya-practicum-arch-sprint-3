@@ -27,10 +27,13 @@
 работу приложения.
 
 ### Домены и границы контекстов в системе
-- описаны в файле System_DDD.puml
+- описаны в [файле](System_DDD.puml)
 
 ### C4-диаграмма приложения
-- файлы Context.puml, Container.puml, Component.puml, Code.puml
+- [Context layer](Context.puml)
+- [Container layer](Container.puml) 
+- [Component layer](Component.puml)
+- [Code layer](Code.puml)
 
 
 
