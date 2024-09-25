@@ -1,0 +1,76 @@
+### post new deivce
+POST http://{{api-gateway}}/api/devices
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "serialNumber": "d-4-snn",
+  "deviceType": "light",
+  "status": "active"
+}
+
+### get device info
+GET http://{{api-gateway}}/api/devices/457daf5f-2835-40d4-bcd0-34873984320e
+Content-Type: application/json
+X-Source: test.http
+
+
+### post device command
+POST http://{{api-gateway}}/api/devices/cb37b1fd-30f2-45e2-abd5-e957492a3d7d/commands
+Content-Type: application/json
+
+{
+  "command": "gates",
+  "value": "open"
+}
+
+
+### post telemetry for not found device
+POST http://{{api-gateway}}/api/data/devices/uuidNotFound/telemetry
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "deviceType": "light",
+  "createdAt": "2024-01-21T09:04:05Z",
+  "telemetryData": "hall_light:on;room_1_light:on"
+}
+
+### post telemetry data 1
+POST http://{{api-gateway}}/api/data/devices/457daf5f-2835-40d4-bcd0-34873984320e/telemetry
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "deviceType": "light",
+  "createdAt": "2024-01-21T09:00:00Z",
+  "telemetryData": "hall_light:on;room_1_light:on"
+}
+
+### post telemetry data 2
+POST http://{{api-gateway}}/api/data/devices/457daf5f-2835-40d4-bcd0-34873984320e/telemetry
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "deviceType": "light",
+  "createdAt": "2024-01-22T15:05:05Z",
+  "telemetryData": "hall_light:on;room_1_light:on"
+}
+
+### get telemetry history data
+GET http://{{api-gateway}}/api/data/devices/457daf5f-2835-40d4-bcd0-34873984320e/telemetry?from=2024-01-20T15:05:05Z&to=2024-01-30T15:05:05Z
+X-Source: test.http
+
+### get telemetry latest data
+GET http://{{api-gateway}}/api/data/devices/457daf5f-2835-40d4-bcd0-34873984320e/telemetry/latest
+X-Source: test.http
+
+
+### update device status
+PUT http://{{api-gateway}}/api/devices/457daf5f-2835-40d4-bcd0-34873984320e/status
+Content-Type: application/json
+
+{
+  "status": "inactive"
+}

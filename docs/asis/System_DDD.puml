@@ -1,0 +1,22 @@
+@startuml
+
+package "SmartHome system" <<Enterprise>> {
+  package "Domain: HeatingSystem Management" <<System>> {
+    component "Subdomain: SmartHome Users's Entity Management" <<System>> {
+      note "Admin create/update user's home system" as N1
+    }
+    component "Subdomain: Home Нeating System Management" <<System>> {
+      note "Handles user's commands such as set temp, on/off system" as N2
+    }
+
+    component "Subdomain: Automatic Heating processor" <<System>> {
+      note "Maintaining a set temperature in users' homes" as N3
+    }
+  }
+}
+
+N1 .. "Subdomain: SmartHome Users's Entity Management"
+N2 .. "Subdomain: Home Нeating System Management"
+N3 .. "Subdomain: Automatic Heating processor"
+
+@enduml

@@ -1,0 +1,19 @@
+```plantuml
+@startuml
+actor User
+participant "Web App (React)" as WebApp
+participant "Api Gateway" as ApiGateway
+participant "Auth service" as Auth
+participant "Device Manager service" as DM
+participant "Device Manager service DB" as DmDb
+
+User -> WebApp: Посмотреть данные об устройстве\nSmartHome (SH)
+WebApp -> ApiGateway: GET /api/devices/{device_id}
+ApiGateway <-> Auth: Проверка auth token
+ApiGateway -> DM: Запрос данных об устройстве
+DM <-> DmDb: Выборка по device_id
+DM -> ApiGateway: Response with device info
+ApiGateway -> WebApp: Response with device info
+WebApp -> User: Response with device info
+
+@enduml

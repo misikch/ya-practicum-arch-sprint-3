@@ -1,0 +1,24 @@
+@startuml
+title SmartHomeSystem Container Diagram
+
+top to bottom direction
+
+'!include ./C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User", "A user of the SmartHome system")
+Person(admin, "Admin", "Administrator of the SmartHome system")
+System(SmartHomeSystem, "SmartHome System", "System manages user's smart home")
+
+Container_Boundary(SmartHomeSystem, "SmartHome System") {
+  Container(WebApp, "Web Application", "Java", "Handles user interactions")
+  Container(Database, "Database", "PostgreSQL", "Stores sensor's data and current setup")
+}
+
+System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers in the user's home")
+
+Rel(user, WebApp, "Uses the system: set on/off of home heating system, set temp, get current temp")
+Rel(admin, WebApp,"Register/update user's home heating system")
+Rel(WebApp,Database,"Reads/Writes smartHome data")
+Rel(WebApp,usersHome,"Get sensors data, run command on/off for heating controllers")
+@enduml

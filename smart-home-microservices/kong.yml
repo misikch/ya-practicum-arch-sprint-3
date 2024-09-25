@@ -1,0 +1,29 @@
+_format_version: "2.1"
+services:
+  - name: device-manager
+    url: http://device-manager:8081
+    routes:
+      - name: device-manager-route
+        paths:
+          - /api
+        strip_path: true   # Убирает префикс пути
+        methods:
+          - GET
+          - POST
+          - PUT
+
+  - name: telemetry-service
+    url: http://telemetry-service:8082
+    routes:
+      - name: telemetry-service-route
+        paths:
+          - /api/data
+        methods:
+          - GET
+          - POST
+
+plugins:
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT"]
