@@ -1,0 +1,22 @@
+```plantuml
+@startuml
+actor User
+participant "Web App (React)" as WebApp
+participant "Api Gateway" as ApiGateway
+participant "Auth service" as Auth
+participant "Device Manager service" as DM
+participant "Device Manager service DB" as DmDb
+participant "User's home SmartHome module" as ShModule
+
+User -> WebApp: Отправка команды устройству
+WebApp -> ApiGateway: POST /api/devices/{device_id}/commands \n {\n  "command": "command_name",\n  "value": "command_string"\n}
+ApiGateway <-> Auth: Проверка auth token
+ApiGateway -> DM: Команда на выполнение
+DM <-> DmDb: Выборка по device_id
+DM -> ShModule: Отправка команды на устройство
+DM <-> DmDb: логируем действие
+DM <-> ApiGateway: Response 'command was sent successfully'
+ApiGateway -> WebApp: Response 'command was sent successfully'
+WebApp -> User: Response 'command was sent successfully'\nО результате выполнения команды\nУзнаем позже из телеметрии async
+
+@enduml

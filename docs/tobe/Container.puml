@@ -4,7 +4,8 @@ title SmartHomeSystem Container Diagram
 top to bottom direction
 
 
-!include ./C4_Container.puml
+'!include ./C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 Person(user, "User", "A user of the SmartHome system")
 Person(admin, "Admin", "Administrator of the SmartHome system")
@@ -28,7 +29,7 @@ Container_Boundary(SmartHomeSystem, "SmartHome System") {
     }
 
     together {
-        Container(AuthService, "Check Auth microservice", "golang", "user auth service")
+        Container(AuthService, "Auth microservice", "golang", "user auth service")
         Container(AuthServiceDatabase, "Auth microservice DB", "PostgreSQL", "Stores auth data (tokens, etc)")
     }
 
@@ -48,7 +49,7 @@ Container_Boundary(SmartHomeSystem, "SmartHome System") {
 System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers in the user's home")
 
 Rel(user, UserFrontend, "Uses the system: control smart home using SaaS system")
-Rel(admin, AdminFrontend,"Register/update user's home heating system")
+Rel(admin, AdminFrontend,"Register/update user's home devices")
 Rel(UserFrontend, ApiGateway, "handle http requests")
 Rel(AdminFrontend, ApiGateway, "handle http requests")
 Rel(ApiGateway, Telemetry, "handle http requests")

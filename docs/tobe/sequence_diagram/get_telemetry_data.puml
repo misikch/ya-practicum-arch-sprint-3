@@ -1,0 +1,20 @@
+```plantuml
+@startuml
+actor User
+participant "Web App (React)" as WebApp
+participant "Api Gateway" as ApiGateway
+participant "Auth service" as Auth
+participant "Telemetry service" as T
+participant "Telemetry service DB" as Tdb
+
+User -> WebApp: Просмотр данных телеметрии за период
+WebApp -> ApiGateway: POST /api/data/devices/{device_id}/telemetry \n {\n  "deviceType",\n  "createdAt",\n  "telemetryData"\n}
+ApiGateway <-> Auth: Проверка auth token
+ApiGateway -> T: Запрос на исторические данные телеметрии
+T <-> Tdb: Проверяем, что такое устройство\nдействительно имеется\nи оно в правильном статусе
+T <-> Tdb: Делаем выборку по dateFrom, dateTo
+T -> ApiGateway: Response with telemetry history
+ApiGateway -> WebApp: Response with telemetry history
+WebApp -> User: Исторические данные телеметрии
+
+@enduml

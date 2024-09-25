@@ -1,0 +1,25 @@
+```plantuml
+@startuml
+actor User
+participant "Web App (React)" as WebApp
+participant "Api Gateway" as ApiGateway
+participant "Auth service" as Auth
+participant "Device Manager service" as DM
+participant "Device Manager service DB" as DmDb
+participant "Databus" as Databus
+participant "Telemetry service" as Telemetry
+participant "Telemetry service DB" as TelemetryDb
+
+User -> WebApp: Добавить устройство в систему SmartHome (SH)
+WebApp -> ApiGateway: POST /api/devices\n{\nserialNumber,\ndeviceType\nstatus\n}
+ApiGateway <-> Auth: Проверка auth token
+ApiGateway -> DM: Передача данных об устройстве
+DM -> DmDb: Сохранение в БД
+DM -> Databus: Публикация события в Databus
+Databus -> Telemetry: Вычитывание события\nо новом устройстве
+Telemetry -> TelemetryDb: Сохранение данных\nоб устройстве
+DM -> ApiGateway: Response OK
+ApiGateway -> WebApp: Response OK
+WebApp -> User: Response OK
+
+@enduml

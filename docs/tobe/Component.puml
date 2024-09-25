@@ -3,7 +3,8 @@ title SmartHomeSystem Web Application Component Diagram
 
 top to bottom direction
 
-!include ./C4_Component.puml
+'!include ./C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 Person(user, "User", "A user of the SmartHome system")
 Person(admin, "Admin", "Administrator of the SmartHome system")
@@ -75,7 +76,7 @@ Container(DeviceManager, "Device manager microservice", "Golang") {
   Component(DeviceManagerController, "Device manager http req handler", "send data, get stored data")
   Component(DeviceManagerServiceLayer, "Service Layer", "business logic (create device, update status, run command)")
   Component(DeviceManagerCommandsProcessor, "Devices commands processor", "business logic for devices commands")
-  Component(DeviceManagerBackgroundWorker, "Background worker pool", "run background business logic (like heating controllers")
+  Component(DeviceManagerBackgroundWorker, "Background worker pool", "run background business logic")
   Component(DeviceManagerRepositoryLayer, "Repository Layer", "Data access logic")
   Component(DeviceManagerDatabusAdapter, "Databus adapter", "publish create/update device event")
 }
@@ -83,7 +84,7 @@ Container(DeviceManager, "Device manager microservice", "Golang") {
 System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers in the user's home")
 
 Rel(user, UserFrontend, "Uses the system: control smart home using SaaS system")
-Rel(admin, AdminFrontend,"Register/update user's home heating system")
+Rel(admin, AdminFrontend,"Some admin interactions")
 Rel(UserFrontend, ApiGateway, "handle http requests")
 Rel(AdminFrontend, ApiGateway, "handle http requests")
 

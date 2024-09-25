@@ -1,0 +1,18 @@
+```plantuml
+@startuml
+actor "Smart Home module" as ShModule
+participant "Api Gateway" as ApiGateway
+participant "Telemetry service" as T
+participant "Telemetry service DB" as Tdb
+participant "Databus" as Databus
+
+ShModule -> ApiGateway: Запрос данных телеметрии \nGET /api/data/devices/{device_id}/telemetry?from=&to=
+ApiGateway -> T: Данные телеметрии устройства
+T <-> Tdb: Проверяем, что такое устройство\nдействительно имеется\nи оно в правильном статусе
+T -> Tdb: Пишем телеметрию в хранилище
+T -> Databus: Пишем событие в шину данных \n(например для notification service и \nпроч. async операций)
+T -> ApiGateway: Response OK
+ApiGateway -> ShModule: Response OK
+
+
+@enduml

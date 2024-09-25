@@ -3,7 +3,8 @@ title SmartHome Context Diagram
 
 top to bottom direction
 
-!include ./C4_Context.puml
+'!include ./C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
 Person(user, "User", "A user of the SmartHome system")
 Person(admin, "Admin", "Administrator of the SmartHome system")
@@ -14,6 +15,7 @@ System_Ext(usersHome, "UserSmartHomeSystem", "Sensors and controllers")
 
 Rel(user, SmartHomeSystem, "Uses the system: control smart home using SaaS system")
 Rel(admin, SmartHomeSystem, "using admin panel")
-Rel(SmartHomeSystem, usersHome,"Get sensors data, run command for controllers")
+Rel(SmartHomeSystem, usersHome,"Run command for controllers\n(modules)")
+Rel(usersHome, SmartHomeSystem, "Modules send telemetry")
 
 @enduml

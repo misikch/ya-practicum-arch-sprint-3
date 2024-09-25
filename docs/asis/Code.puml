@@ -3,7 +3,8 @@ title SmartHomeSystem Web App Code Diagram
 
 top to bottom direction
 
-!include ./C4_Component.puml
+'!include ./C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 class HeatingSystemController {
   +ResponseEntity<HeatingSystemDto> getHeatingSystem()

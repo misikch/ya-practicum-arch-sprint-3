@@ -3,7 +3,8 @@ title SmartHomeSystem Microservices
 
 top to bottom direction
 
-!include ./C4_Component.puml
+'!include ./C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 package "Telemetry Microservice" {
     class TelemetryMicroserviceHandler {
